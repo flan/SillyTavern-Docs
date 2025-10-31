@@ -1,3 +1,11 @@
+---
+order: 90
+icon: tasklist
+route: /usage/core-concepts/worldinfo/insertion/
+templating: false
+---
+
+# Prompt Insertion
 
 ## Character Lore
 

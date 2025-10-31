@@ -1,22 +1,149 @@
+---
+order: 100
+icon: pencil
+route: /usage/core-concepts/worldinfo/structure/
+templating: false
+---
 
+# Lorebook Structure
+
+At the most basic level, Lorebooks are like encyclopedia entries: there is an article and there are a few keywords that can be used to find it.
+
+Within SillyTavern, there is some additional metadata, like how to interpret those keywords and how important each entry is, but these will make sense as you start building.
+
+## Lorebook Entries
+
+A Lorebook is a list of entries, and the order in which they appear is entirely for your benefit as the author: group them by purpose, sort them alphabetically... Do whatever makes sense to you.
+
+### Anatomy of an entry
+
+Every entry has a number of fields, presented here in the order they appear with v1.13.5.
+
+In the first row of every entry, there is an unlabeled "enabled" toggle that lets the entry be quickly turned off entirely. This is useful for testing. and quick-swapping of state.
+
+#### Title/Memo
+Descriptive text to help the reader know what this entry is for. It is *not* sent to the LLM.
 
 #### Strategy
+- 🔵 (Blue Circle) = This entry will always be activated.
+- 🟢 (Green Circle) = This entry will be activated only when its keywords are matched.
+- 🔗 (Chain Link) = This entry will be matched based on [special magic math](./advanced.md#vector-storage-matching).
+  - The idea here is to let the LLM score the entry according to its own understanding of language, then compare those scores to the context being evaluated to determine whether they are sufficiently similar to warrant inclusion.
+  - This is a common cause of confusion when writing Lorebooks and it is not recommended while you are still learning how to interact with your LLM model, SillyTavern, and story-generation in general.
 
-1. 🔵 (Blue Circle) = The entry would always be present in the prompt.
-2. 🟢 (Green Circle) = The entry will be triggered only in the presence of the keyword.
-3. 🔗 (Chain Link) = The entry is allowed to be inserted by embedding similarity.
+#### Position
 
-Each Entry also has a toggle that allows you to enable or disable the entry.
+A means of ordering where the entry will appear in the prompt sent to the LLM; see [Insertion Position](./insertion.md#insertion-position).
 
-#### Probability (Trigger %)
+##### Depth
+A means of determining where entries go related to each other at the same Position.
 
-This value acts like an additional filter that adds a chance for the entry NOT to be inserted when it is activated by any means (constant, primary key, recursion).
+##### Order
+A means of more-granularly sorting the position of entries within the final prompt.
 
-1. Probability = 100 means that the entry will be inserted on every activation.
-2. Probability = 50 means that the entry will be inserted with a 1:1 chance.
-3. Probability = 0 means that the entry will NOT be inserted (essentially disabling it).
+#### Trigger %
+The probability that the entry will be activated when all selection criteria are met, used to introduce some randomness.
 
-Use this to create random events in your chats. For example, every message could have a 1% chance of waking up an Elder God if its name is mentioned in the message.
+Example uses of this could be to change the weather or to have a 1% chance of waking an Elder God with each message if your story needs a looming high-stakes threat.
+
+#### Keywords
+
+These are the main matching rules for Lorebook Entries.
+
+##### Primary Keywords
+A comma-delimited list of strings (text) that are used to match this entry for activation.
+
+Example: `cat,kitten, feline` (whitespace is trimmed).
+
+##### Optional Filter
+A comma-delimited list of strings (text) that are used to further match this entry for activation.
+
+Example: `dog, puppy,canine` (whitespace is trimmed).
+
+##### Logic
+When an Optional Filter is specified, this will determine how to interpret it using common Boolean logic:
+  - `AND ANY` activates the entry only if one of the Primary Keywords and *any* of the Optional Filter keywords are present.
+  - `AND ALL`: activates the entry only if one of the Primary Keywords and *all* of the Optional Filter keywords are present.
+  - `NOT ANY`: activates the entry only if one of the Primary Keywords and *none* of the Optional Filter keywords are present.
+  - `NOT ALL`: activates the entry only if one of the Primary Keywords and *all* of the Optional Filter keywords are present.
+    - If the Optional Filter is `dog, puppy, canine` and both `dog` and `puppy` are present, but `canine` is absent, the entry will be activated.
+
+#### Scan Depth
+
+#### Case-Sensitive
+
+#### Whole Words
+
+#### Group Scoring
+
+#### Automation ID
+
+#### Content
+    - Non-recursable
+    - Delay until recursion
+    - Prevent further recursion
+    - Ignore budget
+
+#### Inclusion Group
+    - Prioritize
+
+#### Group Weight
+#### Sticky
+#### Cooldown
+#### Delay
+#### Filter to Characters or Tags
+    - Exclude
+#### Filter to Generation Triggers
+
+#### Additional Matching Sources
+
+By default, entries are only evaluated against the scan-buffer specified by [Scan Depth](#scan-depth).
+
+These options allow other sources of text to be considered, which may be useful when you want to include information that is not part of the chat-history itself or may even be descriptive metadata.
+
+- Character Description
+  - Includes `{{char}}`'s Description text.
+- Character Personality
+  - Includes `{{char}}`'s Personality text, located under Advanced Definitions.
+- Scenario
+  - Includes `{{char}}`'s Scenario text, located under Advanced Definitions.
+- Persona Description
+  - Includes `{{user}}`'s Description text.
+- Character's Note
+  - Includes `{{char}}`'s Character Note text, located under Advanced Definitions.
+- Creator's Notes
+  - Includes `{{char}}`'s Creator's Notes text, located under Advanced Definitions; this is typically entirely commentary.
+
+### Regular Expressions (regex) as keys
+
+Both Primary Keywords and Optional Filter support [regular expression syntax that complies with the Mozilla-published specification](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions).
+
+Regular expressions allow a single string to match multiple possible pieces of text, reducing the amount of repetition and prediction you need to account for.
+
+Consider a bit of text like "Computer, switch to DefProt 7 Red". Suppose that, in your world, you have a lot of colored defense-protocols, and that `DefProt` on its own doesn't refer to a specific battle-plan. You *could* write a long list of keywords like `defprot 1 red,defprot 2 orange,defprot 1 yellow`, but that's tedious to read and maintain; you could also match on `defprot` `AND ANY` `red,green,orange`, but then that might match someone talking about some fruit.
+
+With regular expressions, you could reduce this to `defprot \d+ (?:red|yellow|orange|banana)` and solve all of the problems at once.
+
+They can be combined with macros, too, for even more specialised cases:
+
+```javascript
+/(?:{{char}}|he|she) (?:is talking about|is noticing|is checking whether|observes) (?:the )?(rainy weather|heavy wind|it is going to rain|cloudy sky)/i
+```
+
+This would create an entry that reacts to the current character doing something specific to the weather.
+
+#### Matching on a per-character basis
+
+The text considered for World Info matching, the scan-buffer, is prefixed with `{{char}}:` or `{{user}}:` before every message. Starting with SillyTavern version v1.12.6, the scan-buffer also delimits messages with the non-printable character `\x01`. These two properties together allow a regular expression to look for text produced by a specific character, which can help to gate information in a Lorebook based on a sort of ownership.
+
+For example, the following regex would trigger only when the user says "banana bread" somewhere in their message:
+
+```javascript
+/\x01{{user}}:[^\x01]*?.*?\bbanana bread\b.*?[^\x01]*?/i
+```
+
+(The `[^\x01]` parts avoid considering more than one message)
+
 
 
 
@@ -147,51 +274,20 @@ Shows an alert if the activated World Info exceeds the allocated token budget.
 
 ### World Info Entry
 
+#### Entry Title / Memo
+
+A text field for your convenience to label your entries, which is not utilized by the AI or any of the trigger logics.
+
+If empty, can be backfilled using the entries' first key by clicking on the "Fill empty memos" button.
+
+
 #### Key
 
 A list of keywords that trigger the activation of a World Info entry. Keys are not case-sensitive by default (this is [configurable](#case-sensitive-keys)).
 
-##### Regular Expression (Regex) as Keys
-
-Keys allow a more flexible approach to matching by supporting regex. This makes it possible to match more dynamic content with optional words or characters, spacing, and all the other utilities that regex provides.  
-If a defined key is a valid regex (Javascript regex style, with `/` as delimiters. All flags are allowed), it will be treated as such when checking whether an entry should be triggered. Multiple regexes can be entered as separate keys and will work alongside each other. Inside a regex, commas are possible. Plaintext keys do not support commas, as they are treated as key separators.  
-
-An example of a use-case for advanced regex matching:  
-An entry/instruction that should be inserted, when char is doing a weather-related action
-
-```js
-/(?:{{char}}|he|she) (?:is talking about|is noticing|is checking whether|observes) (?:the )?(rainy weather|heavy wind|it is going to rain|cloudy sky)/i
-```
-
-For more information on Regex syntax and possibilities: [Regular expressions - JavaScript | MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions)
-
-###### Advanced Regex Per-Message Matching
-
-ST prefixes every chat message in the WI scan buffer with `character name:` and after v1.12.6, concatenates prepends them using the character value 1 (`\x01`).  
-This means you can match specific input or output from a certain character using a regex tied to that separation character.
-
-For example, to match only the user saying "hello", you could use the following regex:
-
-```js
-/\x01{{user}}:[^\x01]*?hello/
-```
-
 ##### Key Input
 
 There are two modes to enter keywords, each with a slightly different UI. In ⌨️ *plaintext mode* (default), keys can be entered as a comma-separated list in a single text field. Regexes can be included too, but they don't have any special highlighting. In ✨ *fancy mode*, the keys appear as separate elements and regexes will be highlighted as such. The control supports editing and deleting keys. The mode can be switched via the inline button inside the input control.
-
-#### Optional Filter
-
-Comma-separated list of additional keywords in conjunction with the primary key.
-If no arguments are provided, this flag is ignored.
-Supports logic for AND ANY, NOT ANY, or NOT ALL
-
-1. AND ANY = Activates the entry only if the primary key and Any one of the optional filter keys are in scanned context.
-2. AND ALL = Activates the entry only if the primary key and ALL of the optional filter keys are present.
-3. NOT ANY = Activates the entry only if the primary key and None of the optional filter keys are in scanned context.
-4. NOT ALL = Prevents activation of the entry despite primary key trigger, if all of the optional filters are in scanned context.
-
-These keys also support [regex](#regular-expression-regex-as-keys).
 
 
 #### Use Group Scoring
@@ -243,14 +339,3 @@ The generation types for which this World Info entry can be activated. If nothin
 !!!
 The "Regenerate" trigger is not available in group chats as it uses different regeneration logic: all messages from the last reply are deleted, and messages are queued using the "Normal" generation type according to the chosen [Group reply strategy](/Usage/Characters/groupchats.md#reply-order-strategies).
 !!!
-
-#### Additional matching sources
-
-By default World Info Entries are matched only against content from the current conversation. These options allow you to match the entry against different character information that does not show up in the chat, or even persona information. This is useful when you want to have a wide range of entries that are to be used between several characters but don't want to have to manage large lists of tags, or don't want to have to update character filter lists every time you create a new one. This also allows you to match entries based on the persona you have active.
-
-* **Character Description**: Matches against the character description.
-* **Character Personality**: Matches against the character personality summary, found under Advanced Definitions.
-* **Scenario**: Matches against the character specified scenario, found under Advanced Definitions.
-* **Persona Description**: Matches against the current selected persona's description.
-* **Character's Note**: Matches against the character's note, which can be found under Advanced Definitions.
-* **Creator's Notes**: Matches against the character creator's notes, which can be found under Advanced Definitions. The creator's notes are usually not included in the prompt.

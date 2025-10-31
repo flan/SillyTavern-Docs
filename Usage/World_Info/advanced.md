@@ -1,3 +1,8 @@
+---
+order: 10
+route: /usage/core-concepts/worldinfo/advanced/
+templating: false
+---
 
 ## Vector Storage Matching
 
