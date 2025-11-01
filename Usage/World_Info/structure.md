@@ -168,12 +168,18 @@ The "Prioritize" flag may be used to indicate this this entry is dominant, with 
 If multiple members of a group are set to be activated, this influences the dice-roll to determine which will be chosen: `weight / sum(weights[first_entry], weights[second_entry], ...)`
 
 #### Sticky
+> See [Timed Effects](./advanced.md#timed-effects) for more information.
+
 This allows an entry to remain active for an arbitrary number of messages after it was activated, to help it have a lasting effect on the story. Useful when randomly waking Elder Gods or learning about a character's traumatic past.
 
 #### Cooldown
+> See [Timed Effects](./advanced.md#timed-effects) for more information.
+
 This allows an entry to stay dormant after being triggered for an arbitrary number of messages, to create some unpredictability. You might have deduced that you are being stalked by a terrible monster, but it won't reveal itself to you *just* yet.
 
 #### Delay
+> See [Timed Effects](./advanced.md#timed-effects) for more information.
+
 This ensures that an entry will not be triggered before a certain number of messages have been exchanged in the chat. This helps to ensure your initial "where am I?" question is not met with a detailed breakdown of a millennia of political machinations.
 
 #### Filter to Characters or Tags
@@ -232,7 +238,7 @@ This would create an entry that reacts to the current character doing something 
 
 #### Matching on a per-character basis
 
-The text considered for World Info matching, the scan-buffer, is prefixed with `{{char}}:` or `{{user}}:` before every message when the [Include Names](#include-names) option is set. Starting with SillyTavern version v1.12.6, the scan-buffer also delimits messages with the non-printable character `\x01`. These two properties together allow a regular expression to look for text produced by a specific character, which can help to gate information in a Lorebook based on a sort of ownership.
+The text considered for World Info matching, the scan-buffer, is prefixed with `{{char}}:` or `{{user}}:` before every message when the [Include Names](./global.md#include-names) option is set. Starting with SillyTavern version v1.12.6, the scan-buffer also delimits messages with the non-printable character `\x01`. These two properties together allow a regular expression to look for text produced by a specific character, which can help to gate information in a Lorebook based on a sort of ownership.
 
 For example, the following regex would trigger only when the user says "banana bread" somewhere in their message:
 

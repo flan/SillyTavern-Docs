@@ -31,8 +31,8 @@ We provide the following parameters to the Handlebars evaluator (wrapped in doub
 7. `{{persona}}`: The selected [persona's description](/Usage/personas.md#persona-description).
 8. `{{char}}`: The character's name.
 9. `{{user}}`: The selected persona's name.
-10. `{{wiBefore}}` or `{{loreBefore}}`: Combined activated [World Info](/Usage/worldinfo.md) entries with Position set to "Before Char Defs".
-11. `{{wiAfter}}` or `{{loreAfter}}`: Combined activated [World Info](/Usage/worldinfo.md) entries with Position set to "After Char Defs".
+10. `{{wiBefore}}` or `{{loreBefore}}`: Combined activated [World Info](/Usage/worldinfo/index.md) entries with Position set to "Before Char Defs".
+11. `{{wiAfter}}` or `{{loreAfter}}`: Combined activated [World Info](/Usage/worldinfo/index.md) entries with Position set to "After Char Defs".
 12. `{{mesExamples}}`: (Optional) The character's [Example Dialogues](/Usage/Characters/characterdesign.md#examples-of-dialogue), instruct-formatted with a separator.
 13. `{{mesExamplesRaw}}`: The character's [Example Dialogues](/Usage/Characters/characterdesign.md#examples-of-dialogue) in raw format, without any formatting.
 
