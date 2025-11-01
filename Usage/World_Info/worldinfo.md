@@ -179,7 +179,7 @@ This allows an entry to remain active for an arbitrary number of messages after 
 #### Cooldown
 > See [Timed Effects](./advanced.md#timed-effects) for more information.
 
-This allows an entry to stay dormant after being triggered for an arbitrary number of messages, to create some unpredictability. You might have deduced that you are being stalked by a terrible monster, but it won't reveal itself to you *just* yet.
+This allows an entry to only be activated on occasion. You *just* finished dealing with a surprise phone-call; you don't want to do that again any time soon.
 
 #### Delay
 > See [Timed Effects](./advanced.md#timed-effects) for more information.
