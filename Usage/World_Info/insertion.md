@@ -15,21 +15,7 @@ To do that, navigate to a Character Management panel and click a globe button, t
 
 To unbind or change character lore, Shift-click the globe button. If on mobile, click "More..." and then "Link World Info".
 
-### Character Lore Insertion Strategy
 
-When generating an AI reply, entries from the character World Info will be combined with the entries from a global World Info selector using one of the following strategies:
-
-#### Sorted Evenly (default)
-
-All entries will be sorted according to their Insertion Order as if they a part of one big file, ignoring the source.
-
-#### Character Lore First
-
-Entries from the Character World Info would be included first by their Insertion Order, then entries from the Global World Info.
-
-#### Global Lore First
-
-Entries from the Global World Info Info would be included first by their Insertion Order, then entries from the Character World Info.
 
 #### Entry Content
 

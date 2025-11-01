@@ -29,11 +29,11 @@ Empty titles can be auto-populated with the "Fill empty memos" button at the top
 #### Strategy
 - 🔵 (Blue Circle) = This entry will always be activated.
 - 🟢 (Green Circle) = This entry will be activated only when its keywords are matched.
-- 🔗 (Chain Link) = This entry will be matched based on [special magic math](./advanced.md#vector-storage-matching).
+- 🔗 (Chain Link) = This entry will be matched based on [Vector Storage Matching](./advanced.md#vector-storage-matching).
   - The idea here is to let the LLM score the entry according to its own understanding of language, then compare those scores to the context being evaluated to determine whether they are sufficiently similar to warrant inclusion.
   - This is a common cause of confusion when writing Lorebooks and it is not recommended while you are still learning how to interact with your LLM model, SillyTavern, and story-generation in general.
 
-*Note: activating an entry is not sufficient for it to be [included in the final prompt](./insertion.md): there is a [limited amount of space available](./global.md#context--budget) and some entries may be dropped.*
+*Note: activating an entry is not sufficient for it to be [included in the final prompt](./insertion.md): there is a [limited amount of space available](./global.md#context--and-budget-cap) and some entries may be dropped.*
 
 #### Position
 

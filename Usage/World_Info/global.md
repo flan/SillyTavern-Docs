@@ -7,23 +7,57 @@ templating: false
 
 # Global Activation Settings
 
-Collapsible menu at the top of the World Info screen.
+These settings apply to all activation logic and may be configured from a collapsible menu located at the top of the World Info screen.
 
-### Scan Depth
+## Scan Depth
 
-> Can be overridden on an entry level.
+> Can be overridden on a per-entry basis.
 
-Defines how many messages in the chat history should be scanned for World Info keys.
+Defines how many messages in the chat history should be scanned for World Info keys, starting from the most recent.
 
-* If set to 0, then only recursed entries and Author's Note are evaluated.
-* If set to 1, then SillyTavern only scans the last message.
-* 2 = two last messages, etc.
+* When set to 0, only recursed entries and Author's Note are evaluated.
+* When set to 1, SillyTavern only scans the last message.
+* When set to 2, the two most recent messages are considered; there is no practical upper limit.
 
-### Include Names
+## Context % and Budget Cap
 
-Defines if the names of the chat participants should be included in the scanned text buffer as message prefixes. This allows activating entries that use names as keywords without directly mentioning the names in messages.
+Specifies how many tokens are available for World Info entries in each prompt sent to the LLM.
 
-See an example of the text to be scanned below, assuming the chat participants are named Alice and Bob.
+This can be defined two ways: as a percentage of your configured [Context size](/Usage/Common-Settings.md#context-tokens) (Context %) and as an absolute value (Budget).
+
+The World Info portions of the prompt will be [filled by priority](./insertion.md) until the available limit is reached. Once the limit is reached, no more activated entries will be considered. 
+
+## Min Activations
+
+*This setting is mutually exclusive with Max Recursion Steps.*
+
+When set to a non-zero value, this will ignore the value set for [Scan Depth](#scan-depth), instead reading as much chat history as needed to reach the target minimum number of activated entries.
+
+This setting will respect [Max Depth](#max-depth) and the [context budget](#context--and-budget-cap).
+
+*The Min Activations pass occurs before any [recursive logic](#recursive-scanning) is evaluated. However, any entries activated by this mechanism will still be processed as usual, including their recursive steps.*
+
+## Max Depth
+
+The Maximum Depth to scan, used to set a limit on how many chat messages [Min Activations](#min-activations) can consider.
+
+## Max Recursion Steps
+
+*This setting is mutually exclusive with Min Activations.*
+
+This serves as a limit on [recursive scanning](#recursive-scanning). When set to `0`, recursion is limited only by your [context budget](#context--and-budget-cap). When set to a non-zero value, this sets a limit on how many successive evaluation passes will be performed following the activation of new entries.
+
+Example cases:
+
+* Max = `1`: no additional checks will be performed; whatever is activated in the first pass is all that will be activated
+* Max = `2`: after the first pass runs, a second pass is performed, including the original [scan-buffer](#scan-depth) and any newly activated entries
+* Max = `3`: after the second pass above, a third pass is performed, including whatever entries were newly activated
+
+## Include Names
+
+Specifies whether the names of chat participants should be included in the text scan-buffer as message prefixes. This allows names to be matched as [Keywords](./structure.md#keywords) without the name needing to be present in the message itself.
+
+Assuming the participants are named Alice and Bob, this would have an effect as illustrated below:
 
 Enabled (default):
 
@@ -39,93 +73,78 @@ Hello! Good to see you.
 How is the weather today?
 ```
 
-### Context % (Budget)
+## Recursive scanning
 
-**Defines how many tokens could be used by World Info entries at once.**
-You can define a threshold relative to your API's max-context settings (Context %) or an objective token threshold (Budget)
+Recursive scanning enables activated entries to activate others in turn, over and over, to resolve complex relationships between World Info entries. This feature can significantly enhance the dynamic nature of creative scenarios.
 
-If the budget is exhausted, then no more entries are activated even if the keys are present in the prompt.
+When this setting is disabled, behaviour is effectively the same as setting [Max Recursion Steps](#max-recursion-steps) to `1`.
 
-Constant entries will be inserted first. Then entries with larger order numbers.
+See [the entry section on recursion](./structure.md#recursion) for a list of options that may be adjusted on a per-entry basis.
 
-Entries inserted by directly mentioning their keys have higher priority than those that were mentioned in other entries' contents.
+The gist of recursion is that *entries can activate other entries by mentioning their keywords in the content text.*
 
-### Min Activations
-
-**This setting is mutually exclusive with Max Recursion Steps.**
-
-Minimum Activations: If set to a non-zero value, this will disregard the limitation of "scan-depth", seeking all of the chat log backward from the latest message for keywords until as many entries as specified in min activations have been triggered. This will still be limited by the Max Depth setting or your overall Budget cap.
-
-*Additional scan sweeps triggered by Min Activations will not check entries added by recursion on previous steps. Only chat messages and extension prompts can trigger these additional activations. However, the entries activated by Min Activations can trigger other entries as usual.*
-
-### Max Depth
-
-Maximum Depth to scan for when using the Min Activations setting.
-
-### Recursive scanning
-
-Recursive scanning allows for entries to activate other entries or be activated by others, enabling complex interactions and dependencies between different World Info entries. This feature can significantly enhance the dynamic nature of your creative scenarios.  
-Whether recursive scanning is enabled can be controlled with the global setting **Recursive Scan**.  
-There are three options available to control recursion for each entry:
-
-8 **Non-recursable**: When this checkbox is selected, the entry will not be activated by other entries. This is useful for static information that should not change or be influenced by other world info entries.
-  
-* **Prevent further recursion**: Selecting this option ensures that once this entry is activated, it will not trigger any other entries. This is helpful to avoid unintended chains of activations.
-
-* **Delay until recursion**: This entry will only be activated during recursive checks, meaning it won't be triggered in the initial pass but can be activated by other entries that have recursion enabled. Now, with the added **Recursion Level** for those delays, entries are grouped by levels. Initially, only the first level (smallest number) will match. Once no matches are found, the next level becomes eligible for matching, repeating the process until all levels are checked. This allows for more control over how and when deeper layers of information are revealed during recursion, especially in combination with criteria as NOT ANY or NOT ALL combination of key matches.
-
-**Entries can activate other entries by mentioning their keywords in the content text.**
-
-For example, if your World Info contains two entries:
+For example, suppose your Lorebook contains two entries:
 
 ```txt
 Entry #1
-Keyword: Bessie
+Keyword: bessie
 Content: Bessie is a cow and is friends with Rufus.
 ```
 
 ```txt
 Entry #2
-Keyword: Rufus
+Keyword: rufus
 Content: Rufus is a dog.
 ```
 
-**Both** of them will be pulled into the context if the message text mentions **just Bessie**.
+Next, suppose the text "Bessie saw her friend playing in the field." is part of your [scan-buffer](#scan-depth). When this happens, *both* entries will be activated because "Bessie" activated the "bessie" entry and it activated the "rufus" entry. Now your LLM knows that Bessie's friend in the field is most likey a dog, letting it tell a more coherent story.
 
-### Max Recursion Steps
+## Case-sensitive keys
 
-**This setting is mutually exclusive with Min Activations.**
+> Can be overridden on a per-entry basis.
 
-When set to zero, recursion nesting is only limited by your prompt budget. When set to a non-zero value, limits the total number of scan sweeps to desired maximum "nesting level".
+This makes [Keyword](#keywords) matching more strict, requiring that words match exactly in terms of capitalisation.
 
-Example values:
+This is mostly useful if your keys are proper nouns within your chat, like the names of important people or cities. It is likely quite unhelpful if your chat takes the form of text-message exchanges.
 
-* 1 effectively disables recursion as the check stops after the first step.
-* 2 can only activate recursive entries once.
-* 3 can trigger recursion twice...
+For example, when this setting is active, `rose` will *not* match `Rose` becuse `'r' != 'R'`.
 
-### Case-sensitive keys
+## Match whole words
 
-> Can be overridden on an entry level.
+> Can be overridden on a per-entry basis.
 
-**To get pulled into the context, entry keys need to match the case as they are defined in the World Info entry.**
+This makes [Keyword](#keywords) matching more strict, requiring that each keyword matches a word in the input based on common word-boundary markers (spaces, periods, hyphens).
 
-This is useful when your keys are common words or parts of common words.
+This is usually a good idea because `cat` likely shouldn't match `concatenate`.
 
-For example, when this setting is active, keys 'rose' and 'Rose' will be treated differently, depending on the inputs.
+If you want to match words that start or end with a certain sequence of characters, consider [regular expressions](#regular-expressions-regex-as-keys).
 
-### Match whole words
+*Important: this setting is often incompatible with languages that don't use whitespace to separate words (e.g. Japanese, Chinese). If you write entries in these languages, it is advised to turn it off.*
 
-> Can be overridden on an entry level.
+## Use Group Scoring
 
-Entries with keys containing only one word will be matched only if the entire word is present in the search text. Enabled by default.
+> Can be overridden on a per-entry basis.
 
-For example, if the setting is enabled and the entry key is "king", then text such as "long live the king" would be matched, but "it's not to my liking" wouldn't.
+This adds additional filtering logic to entries when Inclusion Groups are in use; for full details, see [the entry on Group Scoring in the entry structure](./structure.md#group-scoring).
 
-**Important:** this setting can have a detrimental effect when used with languages that don't use whitespace to separate words (e.g. Japanese or Chinese). If you write entries in these languages, it is advised to keep it off.
+## Alert on overflow
 
-### Alert on overflow
+Shows an alert when enough entries are activated that their size exceeds the [context budget](#context--and-budget-cap).
 
-Shows an alert if the activated World Info exceeds the allocated token budget.
+Entries will still be discarded as necessary; this just makes it more obvious when experimenting with World Info.
 
+## Insertion Strategy
 
+This selects a prioritization approach for sources of World Info.
+
+### Sorted Evenly (default)
+
+All entries will be sorted according to their Insertion Order as if they were part of a large World Info source, regardless of how they are actually structured.
+
+#### Character Lore First
+
+Entries from character- and persona-bound World Info are included first, then any remaining [context budget](#context--and-budget-cap) is allocated to global- and chat-bound World Info.
+
+#### Global Lore First
+
+Entries from global- and chat-bound World Info are included first, then any remaining [context budget](#context--and-budget-cap) is allocated to character- and persona-bound World Info.
