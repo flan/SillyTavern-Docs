@@ -5,11 +5,13 @@ route: /usage/core-concepts/worldinfo/structure/
 templating: false
 ---
 
-# Lorebook Structure
+# World Info structure
 
-At the most basic level, Lorebooks are like encyclopedia entries: there is an article and there are a few keywords that can be used to find it.
+At the most basic level, entries in a World Info Lorebook are like pages in an encyclopedia: there are articles and there are a few keywords that can be used to find them.
 
-Within SillyTavern, there is some additional metadata, like how to interpret those keywords and how important each entry is, but these will make sense as you start building.
+Within SillyTavern, there is some additional metadata, like [how to interpret those keywords and how entries are ranked against each other](#lorebook-entries).
+
+Towards the end, the process by which SillyTavern [assembles World Info into a request for the LLM](#prompt-insertion) is described.
 
 ## Lorebook Entries
 
@@ -17,7 +19,7 @@ A Lorebook is a list of entries, and the order in which they appear is entirely 
 
 ### Anatomy of an entry
 
-Every entry has a number of fields, presented here in the order they appear with v1.13.5.
+Every entry has a large number of fields, presented here in the order they visually appear as of v1.13.5.
 
 In the first row of every entry, there is an unlabeled "enabled" toggle that lets the entry be quickly turned off entirely. This is useful for testing. and quick-swapping of state.
 
@@ -264,21 +266,21 @@ For this process, there are a few considerations:
 
 This somewhat complicated option is worth taking the time to learn, but the default setting will generally work well enough.
 
-- Before Character Definitions (￪Char): the World Info entry is inserted before the character's description and scenario.
+- **Before Character Definitions** (￪Char): the World Info entry is inserted before the character's description and scenario.
  - This Has a moderate impact on the conversation and might not help much if it refers to information about the character that has not yet been introduced.
-- After Character Definitions (￬Char): the World Info entry is inserted after the character's description and scenario.
+- **After Character Definitions** (￬Char): the World Info entry is inserted after the character's description and scenario.
   - This has a somewhat significant impact on the conversation, allowing additional information about the character to be presented while in close proximity to the character's core definition.
-- Before Example Messages (￪EM): the World Info entry is parsed as an example dialogue block and inserted before any examples provided by the character card.
-- After Example Messages (￬EM): the World Info entry is parsed as an example dialogue block and inserted after any examples provided by the character card.
-- Top of Author's Note (￪AN): World Info entry is inserted above Author's Note content.
+- **Before Example Messages** (￪EM): the World Info entry is parsed as an example dialogue block and inserted before any examples provided by the character card.
+- **After Example Messages** (￬EM): the World Info entry is parsed as an example dialogue block and inserted after any examples provided by the character card.
+- **Top of Author's Note** (￪AN): World Info entry is inserted above Author's Note content.
   - The impact varies with the position of the Author's Note, which is configurable.
-- Bottom of Author's Note (￬AN): World Info entry is inserted below Author's Note content.
+- **Bottom of Author's Note** (￬AN): World Info entry is inserted below Author's Note content.
   - The impact varies with the position of the Author's Note, which is configurable.
-- Depth relative to the end of a prompt-block (@D):
+- **Depth relative to the end of a prompt-block** (@D):
   - ⚙️ (gear): system-role messages
   - 👤 (person): user-role messages
   - 🤖 (robot): assistant-role messages
-- Outlet: The World Info entry is not inserted automatically. Instead, its content is stored under a named Outlet so you can decide exactly where it appears in the prompt; see [Outlet Name](#outlet-name) for details.
+- **Outlet**: The World Info entry is not inserted automatically. Instead, its content is stored under a named Outlet so you can decide exactly where it appears in the prompt; see [Outlet Name](#outlet-name) for details.
 
 Example Message entries will be formatted according to the prompt-building settings: either Instruct Mode or Chat Completion prompt manager. They also follow the Example Messages Behavior rules: being gradually pushed out as context fills, marked as always kept, or disabled altogether.
 
