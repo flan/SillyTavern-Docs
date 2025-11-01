@@ -29,7 +29,7 @@ SillyTavern supports multiple concurrent Lorebooks in a chat:
 * Any number of character-bound Lorebooks, which apply to the character in all chats.
 * Up to one persona-bound Lorebook, which applies to the persona in all chats.
 
-The behavior of these Lorebooks are all functionally identical and entries activated from any [may be be given equal consideration for prompt-insertion](./global.md#insertion-strategy).
+The behavior of these Lorebooks are all functionally identical and entries activated from any [may be given equal consideration for prompt-insertion](./global.md#insertion-strategy).
 
 ### Association
 
