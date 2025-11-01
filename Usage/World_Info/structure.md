@@ -24,6 +24,8 @@ In the first row of every entry, there is an unlabeled "enabled" toggle that let
 #### Title/Memo
 Descriptive text to help the reader know what this entry is for. It is *not* sent to the LLM.
 
+Empty titles can be auto-populated with the "Fill empty memos" button at the top of the Lobrebook list.
+
 #### Strategy
 - 🔵 (Blue Circle) = This entry will always be activated.
 - 🟢 (Green Circle) = This entry will be activated only when its keywords are matched.
@@ -68,32 +70,126 @@ When an Optional Filter is specified, this will determine how to interpret it us
   - `NOT ALL`: activates the entry only if one of the Primary Keywords and *all* of the Optional Filter keywords are present.
     - If the Optional Filter is `dog, puppy, canine` and both `dog` and `puppy` are present, but `canine` is absent, the entry will be activated.
 
+##### Input modes
+There are two modes available to enter keywords, each with a slightly different UI. In ⌨️ *plaintext mode* (default), keys are entered as a comma-separated list in a single text field, as illustrated above. [Regular expressions](#regular-expressions-regex-as-keys) can be specified, too. In ✨ *fancy mode*, keys will instead show up as separate items and regular expressions will be given special highlighting. It is possible to add, edit, and delete all types of keys in either mode; the input mode may be selected by clicking on the icon in the text-field.
+
 #### Scan Depth
+
+> Can inherit from [Global Activation Settings](./global.md).
+
+Defines how many messages in the chat history should be scanned for World Info keys, starting from the most recent.
+
+* When set to 0, only recursed entries and Author's Note are evaluated.
+* When set to 1, SillyTavern only scans the last message.
+* When set to 2, the two most recent messages are considered; there is no practical upper limit.
 
 #### Case-Sensitive
 
+> Can inherit from [Global Activation Settings](./global.md).
+
+This makes [Keyword](#keywords) matching more strict, requiring that words match exactly in terms of capitalisation.
+
+This is mostly useful if your keys are proper nouns within your chat, like the names of important people or cities. It is likely quite unhelpful if your chat takes the form of text-message exchanges.
+
+For example, when this setting is active, `rose` will *not* match `Rose` becuse `'r' != 'R'`.
+
 #### Whole Words
 
+> Can inherit from [Global Activation Settings](./global.md).
+
+This makes [Keyword](#keywords) matching more strict, requiring that each keyword matches a word in the input based on common word-boundary markers (spaces, periods, hyphens).
+
+This is usually a good idea because `cat` likely shouldn't match `concatenate`.
+
+If you want to match words that start or end with a certain sequence of characters, consider [regular expressions](#regular-expressions-regex-as-keys).
+
+*Important: this setting is often incompatible with languages that don't use whitespace to separate words (e.g. Japanese, Chinese). If you write entries in these languages, it is advised to turn it off.*
+
 #### Group Scoring
+<sub>*Though visually displaced in the UI, this is connected to [Inclusion Groups](#inclusion-group).*</sub>
+
+> Can inherit from [Global Activation Settings](./global.md).
+
+When enabled, this adds a pre-selection pass to activation candidacy: each entry that would be activated is scored based on how many of its keywords match and only those with the strongest results are considered. The use-case for this is when members of a group have a common set of [Primary Keywords](#primary-keywords) and a wide range of [Optional Filter keywords](#optional-filter). A random entry will be inserted when a specific key is not provided and vice versa.
+
+The scoring formula is as follows:
+- For each Primary Keyword that matches, 1 point is awarded
+- When using an Optional Filter:
+  - AND ANY: for each keyword that matches, 1 point is awarded
+  - AND ALL: if all keywords match, 1 point is awarded per defined keyword
+  - NOT ANY and NOT ALL: no additional points are awarded
+
+Example:
+
+* Entry 1 (Inclusion Group: "songs")
+  * Keys: {`song`, `sing`, `Black Cat`}
+* Entry 2 (Inclusion Group: "songs")
+  * Keys: {`song`, `sing`, `Ghosts`}
+
+The input `sing me a song` can activate either entry (in this case, 2 keys match: `song` and `sing`), but `sing me a song about Ghosts` will activate only Entry 2 (3 points for Entry 2 versus only 2 points for Entry 1).
 
 #### Automation ID
+This allows you to specify an arbitrary ID; if you do so *and* you create a Quick Reply function with the same ID (using the Quick Replies [extension](/extensions/index.md)), then whenever this entry is activated, that function will also trigger, allowing you to run [STscripts](/For_Contributors/st-script.md) contextually.
+
+Triggered functions will be queued and run in the order that they would be [inserted into your prompt](./insertion.md), [Blue Circle](#strategy) entries first, then others according to [Order](#order). Recursively activated entries will be processed afterwards, using the same ordering mechanism.
+
+If multiple entries would trigger the same Quick Reply function (based on ID-matching), that function will only be triggered once.
 
 #### Content
-    - Non-recursable
-    - Delay until recursion
-    - Prevent further recursion
-    - Ignore budget
+The only part of the entry that the LLM will actually see. When activated, this text, after being processed to evaluate macros like `{{char}}` and `{{random}}`, will be prepared for inclusion in the prompt body.
+
+##### Recursion
+When an entry [qualifies for inclusion in the prompt](./insertion.md), its content will then be used in another activation check, potentially activating even more entries. Each cycle of this process is a recursive layer.
+
+The following flags control how recursion works with this entry, in addition to the [Global Activation Settings](./global.md):
+
+- Non-recursable
+  - This entry *cannot* be activated through recursion.
+- Delay until recursion
+  - This entry can *only* be activated through recursion.
+- Prevent further recursion
+  - This entry cannot be used to activate *other* entries through recursion
+
+##### Budget
+Each activated entry becomes a candidate for inclusion in the prompt that will be sent to the LLM. However, because there is a limited amount of context-space available in any given request, if there are are more prompts than can fit, some will be discarded.
+
+Setting the "Ignore budget" flag will ensure that this entry will not be discarded, exempting it from budgetary considerations. This may negatively affect the amount of space available to prepare a response, however, so be very careful and apply it only to small or absolutely essential entries.
 
 #### Inclusion Group
-    - Prioritize
+An Inclusion Group is a collection of entries with this string as a shared label. When set, only one member of that group may be triggered at any given time, selected from among those that activated.
+
+This may be useful for cases where a character might have one of a selection of demi-human traits, but they would be in conflict with each other if both activated at the same time, such as "cat ears" and "dog ears".
+
+The "Prioritize" flag may be used to indicate this this entry is dominant, with ties being settled based on [Order](#order).
 
 #### Group Weight
+If multiple members of a group are set to be activated, this influences the dice-roll to determine which will be chosen: `weight / sum(weights[first_entry], weights[second_entry], ...)`
+
 #### Sticky
+This allows an entry to remain active for an arbitrary number of messages after it was activated, to help it have a lasting effect on the story. Useful when randomly waking Elder Gods or learning about a character's traumatic past.
+
 #### Cooldown
+This allows an entry to stay dormant after being triggered for an arbitrary number of messages, to create some unpredictability. You might have deduced that you are being stalked by a terrible monster, but it won't reveal itself to you *just* yet.
+
 #### Delay
+This ensures that an entry will not be triggered before a certain number of messages have been exchanged in the chat. This helps to ensure your initial "where am I?" question is not met with a detailed breakdown of a millennia of political machinations.
+
 #### Filter to Characters or Tags
-    - Exclude
+When populated, only the listed characters, or characters with any of the selected tags, will be able to activate this entry.
+
+Setting the "Exclude" flag inverts this behaviour, meaning that the indicated characters and tags *cannot* activate this entry.
+
 #### Filter to Generation Triggers
+Limits the events that can trigger activation of this entry. When none are explicitly specified, all methods are enabled.
+
+- Normal: evaluate this entry whenever the user provides a message.
+- Continue: evaluate this entry whenever the "Continue" button is pressed.
+- Impersonate: evaluate this entry whenever the "Impersonate" button is pressed.
+- Swipe: evaluate this entry whenever swiping occurs.
+- Regenerate: evaluate this entry whenever the Regenerate button is pressed in solo chats.
+- Quiet: evaluate this entry as part of background tasks, such as actions taken by [extensions](/extensions/index.md) or [STscript](/For_Contributors/st-script.md) commands.
+
+*Note: the "Regenerate" trigger is not available in group chats because they use different regeneration logic: all messages following the last reply are deleted, then messages are queued using the "Normal" generation-type according to the chosen [Group reply strategy](/Usage/Characters/groupchats.md#reply-order-strategies).*
 
 #### Additional Matching Sources
 
@@ -134,7 +230,7 @@ This would create an entry that reacts to the current character doing something 
 
 #### Matching on a per-character basis
 
-The text considered for World Info matching, the scan-buffer, is prefixed with `{{char}}:` or `{{user}}:` before every message. Starting with SillyTavern version v1.12.6, the scan-buffer also delimits messages with the non-printable character `\x01`. These two properties together allow a regular expression to look for text produced by a specific character, which can help to gate information in a Lorebook based on a sort of ownership.
+The text considered for World Info matching, the scan-buffer, is prefixed with `{{char}}:` or `{{user}}:` before every message when the [Include Names](#include-names) option is set. Starting with SillyTavern version v1.12.6, the scan-buffer also delimits messages with the non-printable character `\x01`. These two properties together allow a regular expression to look for text produced by a specific character, which can help to gate information in a Lorebook based on a sort of ownership.
 
 For example, the following regex would trigger only when the user says "banana bread" somewhere in their message:
 
@@ -143,199 +239,3 @@ For example, the following regex would trigger only when the user says "banana b
 ```
 
 (The `[^\x01]` parts avoid considering more than one message)
-
-
-
-
-## Activation Settings
-
-Collapsible menu at the top of the World Info screen.
-
-### Scan Depth
-
-> Can be overridden on an entry level.
-
-Defines how many messages in the chat history should be scanned for World Info keys.
-
-* If set to 0, then only recursed entries and Author's Note are evaluated.
-* If set to 1, then SillyTavern only scans the last message.
-* 2 = two last messages, etc.
-
-### Include Names
-
-Defines if the names of the chat participants should be included in the scanned text buffer as message prefixes. This allows activating entries that use names as keywords without directly mentioning the names in messages.
-
-See an example of the text to be scanned below, assuming the chat participants are named Alice and Bob.
-
-Enabled (default):
-
-```txt
-Alice: Hello! Good to see you.
-Bob: How is the weather today?
-```
-
-Disabled:
-
-```txt
-Hello! Good to see you.
-How is the weather today?
-```
-
-### Context % / Budget
-
-**Defines how many tokens could be used by World Info entries at once.**
-You can define a threshold relative to your API's max-context settings (Context %) or an objective token threshold (Budget)
-
-If the budget is exhausted, then no more entries are activated even if the keys are present in the prompt.
-
-Constant entries will be inserted first. Then entries with larger order numbers.
-
-Entries inserted by directly mentioning their keys have higher priority than those that were mentioned in other entries' contents.
-
-### Min Activations
-
-**This setting is mutually exclusive with Max Recursion Steps.**
-
-Minimum Activations: If set to a non-zero value, this will disregard the limitation of "scan-depth", seeking all of the chat log backward from the latest message for keywords until as many entries as specified in min activations have been triggered. This will still be limited by the Max Depth setting or your overall Budget cap.
-
-*Additional scan sweeps triggered by Min Activations will not check entries added by recursion on previous steps. Only chat messages and extension prompts can trigger these additional activations. However, the entries activated by Min Activations can trigger other entries as usual.*
-
-### Max Depth
-
-Maximum Depth to scan for when using the Min Activations setting.
-
-### Recursive scanning
-
-Recursive scanning allows for entries to activate other entries or be activated by others, enabling complex interactions and dependencies between different World Info entries. This feature can significantly enhance the dynamic nature of your creative scenarios.  
-Whether recursive scanning is enabled can be controlled with the global setting **Recursive Scan**.  
-There are three options available to control recursion for each entry:
-
-8 **Non-recursable**: When this checkbox is selected, the entry will not be activated by other entries. This is useful for static information that should not change or be influenced by other world info entries.
-  
-* **Prevent further recursion**: Selecting this option ensures that once this entry is activated, it will not trigger any other entries. This is helpful to avoid unintended chains of activations.
-
-* **Delay until recursion**: This entry will only be activated during recursive checks, meaning it won't be triggered in the initial pass but can be activated by other entries that have recursion enabled. Now, with the added **Recursion Level** for those delays, entries are grouped by levels. Initially, only the first level (smallest number) will match. Once no matches are found, the next level becomes eligible for matching, repeating the process until all levels are checked. This allows for more control over how and when deeper layers of information are revealed during recursion, especially in combination with criteria as NOT ANY or NOT ALL combination of key matches.
-
-**Entries can activate other entries by mentioning their keywords in the content text.**
-
-For example, if your World Info contains two entries:
-
-```txt
-Entry #1
-Keyword: Bessie
-Content: Bessie is a cow and is friends with Rufus.
-```
-
-```txt
-Entry #2
-Keyword: Rufus
-Content: Rufus is a dog.
-```
-
-**Both** of them will be pulled into the context if the message text mentions **just Bessie**.
-
-### Max Recursion Steps
-
-**This setting is mutually exclusive with Min Activations.**
-
-When set to zero, recursion nesting is only limited by your prompt budget. When set to a non-zero value, limits the total number of scan sweeps to desired maximum "nesting level".
-
-Example values:
-
-* 1 effectively disables recursion as the check stops after the first step.
-* 2 can only activate recursive entries once.
-* 3 can trigger recursion twice...
-
-### Case-sensitive keys
-
-> Can be overridden on an entry level.
-
-**To get pulled into the context, entry keys need to match the case as they are defined in the World Info entry.**
-
-This is useful when your keys are common words or parts of common words.
-
-For example, when this setting is active, keys 'rose' and 'Rose' will be treated differently, depending on the inputs.
-
-### Match whole words
-
-> Can be overridden on an entry level.
-
-Entries with keys containing only one word will be matched only if the entire word is present in the search text. Enabled by default.
-
-For example, if the setting is enabled and the entry key is "king", then text such as "long live the king" would be matched, but "it's not to my liking" wouldn't.
-
-**Important:** this setting can have a detrimental effect when used with languages that don't use whitespace to separate words (e.g. Japanese or Chinese). If you write entries in these languages, it is advised to keep it off.
-
-### Alert on overflow
-
-Shows an alert if the activated World Info exceeds the allocated token budget.
-
-
-
-### World Info Entry
-
-#### Entry Title / Memo
-
-A text field for your convenience to label your entries, which is not utilized by the AI or any of the trigger logics.
-
-If empty, can be backfilled using the entries' first key by clicking on the "Fill empty memos" button.
-
-
-#### Key
-
-A list of keywords that trigger the activation of a World Info entry. Keys are not case-sensitive by default (this is [configurable](#case-sensitive-keys)).
-
-##### Key Input
-
-There are two modes to enter keywords, each with a slightly different UI. In ⌨️ *plaintext mode* (default), keys can be entered as a comma-separated list in a single text field. Regexes can be included too, but they don't have any special highlighting. In ✨ *fancy mode*, the keys appear as separate elements and regexes will be highlighted as such. The control supports editing and deleting keys. The mode can be switched via the inline button inside the input control.
-
-
-#### Use Group Scoring
-
-When this setting is enabled globally or per entry, the number of activated entry keys determines the group winner selection. Only the subset of a group with the highest number of key matches will be left to be activated by Group Weight or Inclusion Priority - the rest will be deactivated and removed from the group.
-
-Use this to give more specificity for individual entries in large groups. For example, they can have a common key and a specific key. A random entry will be inserted when a specific key is not provided, and vice versa.
-
-The score calculation logic for primary keys is 1 match = 1 point.
-
-For secondary keys, the interaction depends on the chosen Selective Logic:
-
-1. AND ANY: 1 secondary match = 1 point.
-2. AND ALL: 1 point for every secondary key if they all match.
-3. NOT ANY and NOT ALL: no change.
-
-Example:
-
-* Entry 1. Keys: song, sing, Black Cat. Group: songs
-* Entry 2. Keys: song, sing, Ghosts. Group: songs
-
-The input `sing me a song` can activate either entry (both activated 2 keys), but `sing me a song about Ghosts` will activate only Entry 2 (activated 3 keys).
-
-#### Automation ID
-
-Allows to integrate World Info entries with [STscripts](/For_Contributors/st-script.md) from Quick Replies extension. If both the quick reply command and the WI entry have the same Automation ID, the command will be executed automatically when the entry with a matching ID is activated.
-
-Automations are executed in the order they are triggered, adhering to your designated sorting strategy, combining the [Character Lore Insertion Strategy](#character-lore-insertion-strategy) with the 'Priority' sorting. Which leads to [Blue Circle](#strategy) entries processed first, followed by others in their specified 'Order'. Recursively triggered entries will be processed after in the same order.
-
-The script command will run only once if multiple entries with the same Automation ID are activated.
-
-#### Character Filter
-
-A list of character names for which this entry can be activated. If this list is not empty, the entry will only be activated for characters whose names are on the list. When a tag is selected, the entry will only be activated for characters that have that specific tag.
-
-"Exclude" mode inverts the filter, meaning that the entry will be activated for all characters except those that are added to the list or that have the selected tag(s).
-
-#### Triggers
-
-The generation types for which this World Info entry can be activated. If nothing is selected, the entry can be activated for all generation types. If one or more are selected, the entry will only be activated for those specific generation types:
-
-* **Normal:** Regular message generation request.
-* **Continue:** When the Continue button is pressed.
-* **Impersonate:** When the Impersonate button is pressed.
-* **Swipe:** When the generation is triggered by swiping.
-* **Regenerate:** When the Regenerate button is pressed in solo chats.
-* **Quiet:** Background generation requests, usually triggered by [extensions](/extensions/index.md) or [STscript](/For_Contributors/st-script.md) commands.
-
-!!!
-The "Regenerate" trigger is not available in group chats as it uses different regeneration logic: all messages from the last reply are deleted, and messages are queued using the "Normal" generation type according to the chosen [Group reply strategy](/Usage/Characters/groupchats.md#reply-order-strategies).
-!!!
