@@ -21,7 +21,7 @@ A Lorebook is a list of entries, and the order in which they appear is entirely 
 
 Every entry has a large number of fields, presented here in the order they visually appear as of v1.13.5.
 
-In the first row of every entry, there is an unlabeled "enabled" toggle that lets the entry be quickly turned off entirely. This is useful for testing. and quick-swapping of state.
+In the first row of every entry, there is an unlabeled "enabled" toggle that lets the entry be quickly turned off entirely. This is useful for both testing and swapping attributes of a character.
 
 #### Title/Memo
 Descriptive text to help the reader know what this entry is for. It is *not* sent to the LLM.
