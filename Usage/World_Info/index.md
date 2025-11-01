@@ -12,10 +12,11 @@ templating: false
 The most common expression of World Info (often shortened to "WI") is that of a Lorebook, an indexed dictionary of information. The material within a Lorebook can range from past events from a character's life, to descriptions of cities or species, or even chemistry notes for a study assistant.
 
 WI is typically loaded in a two-step process:
-1. [Activation](./worldinfo.md#strategy) of pre-constructed Lorebooks
-   - During activation, the latest message, chat history, and other sources, such as Lorebooks, are considered to determine which WI entries are candidates for inclusion
-1. [Prompt Insertion](./worldinfo.md#insertion) of activated entries
-   - Once enumerated, relevant WI is sorted and inserted into the prompt to be sent to the AI according to a number of configurable prioritisation strtategies
+1. [Activation](./worldinfo.md#strategy) of pre-constructed Lorebooks.
+   - During activation, the latest message, chat history, and other sources, such as Lorebooks, are considered to determine which WI entries are candidates for inclusion.
+   - The activation process makes use of [Global Activation Settings](./global.md).
+1. [Prompt Insertion](./worldinfo.md#prompt-insertion) of activated entries.
+   - Once enumerated, relevant WI is sorted and inserted into the prompt to be sent to the AI according to a number of configurable prioritization strategies.
 
 *When considering World Info, it is important to always be aware that AIs are statistical evaluation models. Simply making information available to them does not guarantee that they will act upon it or include it in any meaningful way in the output. The effectiveness of your Lorebooks depends strongly upon your ability to write useful entries, the nature and tuning of the AI model in use, and the relevance of the information to the response that should be generated.*
 
@@ -24,11 +25,11 @@ WI is typically loaded in a two-step process:
 SillyTavern supports multiple concurrent Lorebooks in a chat:
 
 * Any number of Active World Lorebooks, which apply to all chats.
-* Up to one chat lorebook, which can keep track of chat-specific history or customizations.
+* Up to one chat Lorebook, which can keep track of chat-specific history or customizations.
 * Any number of character-bound Lorebooks, which apply to the character in all chats.
-* Up to one persona-bound lorebook, which applies to the persona in all chats.
+* Up to one persona-bound Lorebook, which applies to the persona in all chats.
 
-The behaviour of these Lorebooks are all functionally identical and entries activated from any will be given equal consideration for prompt-insertion.
+The behavior of these Lorebooks are all functionally identical and entries activated from any will be given equal consideration for prompt-insertion.
 
 ### Association
 

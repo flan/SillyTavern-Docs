@@ -49,7 +49,7 @@ Learn how to set up and use Welcome Page Assistants to greet you with a designat
 :::callout
 ## Building on SillyTavern
 
-**[World Info](/Usage/worldinfo/index.md)**
+**[World Info](/Usage/World_Info/index.md)**
 
 Manage information and when to insert it into the prompt
 
@@ -92,7 +92,7 @@ Customize prompt construction for Text Completion APIs
 :::
 
 :::callout
-<i class="fa-solid fa-book-atlas fa-2xl fa-fw"></i> **[World Info](/Usage/worldinfo/index.md)**
+<i class="fa-solid fa-book-atlas fa-2xl fa-fw"></i> **[World Info](/Usage/World_Info/index.md)**
 
 Manage information and when to insert it into the prompt
 :::

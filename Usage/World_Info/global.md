@@ -25,7 +25,7 @@ Specifies how many tokens are available for World Info entries in each prompt se
 
 This can be defined two ways: as a percentage of your configured [Context size](/Usage/Common-Settings.md#context-tokens) (Context %) and as an absolute value (Budget).
 
-The World Info portions of the prompt will be [filled by priority](./insertion.md) until the available limit is reached. Once the limit is reached, no more activated entries will be considered. 
+The World Info portions of the prompt will be [filled by priority](./worldinfo.md#prompt-insertion) until the available limit is reached. Once the limit is reached, no more activated entries will be considered. 
 
 ## Min Activations
 
@@ -55,7 +55,7 @@ Example cases:
 
 ## Include Names
 
-Specifies whether the names of chat participants should be included in the text scan-buffer as message prefixes. This allows names to be matched as [Keywords](./structure.md#keywords) without the name needing to be present in the message itself.
+Specifies whether the names of chat participants should be included in the text scan-buffer as message prefixes. This allows names to be matched as [Keywords](./worldinfo.md#keywords) without the name needing to be present in the message itself.
 
 Assuming the participants are named Alice and Bob, this would have an effect as illustrated below:
 
@@ -77,9 +77,9 @@ How is the weather today?
 
 Recursive scanning enables activated entries to activate others in turn, over and over, to resolve complex relationships between World Info entries. This feature can significantly enhance the dynamic nature of creative scenarios.
 
-When this setting is disabled, behaviour is effectively the same as setting [Max Recursion Steps](#max-recursion-steps) to `1`.
+When this setting is disabled, behavior is effectively the same as setting [Max Recursion Steps](#max-recursion-steps) to `1`.
 
-See [the entry section on recursion](./structure.md#recursion) for a list of options that may be adjusted on a per-entry basis.
+See [the entry section on recursion](./worldinfo.md#recursion) for a list of options that may be adjusted on a per-entry basis.
 
 The gist of recursion is that *entries can activate other entries by mentioning their keywords in the content text.*
 
@@ -97,27 +97,27 @@ Keyword: rufus
 Content: Rufus is a dog.
 ```
 
-Next, suppose the text "Bessie saw her friend playing in the field." is part of your [scan-buffer](#scan-depth). When this happens, *both* entries will be activated because "Bessie" activated the "bessie" entry and it activated the "rufus" entry. Now your LLM knows that Bessie's friend in the field is most likey a dog, letting it tell a more coherent story.
+Next, suppose the text "Bessie saw her friend playing in the field." is part of your [scan-buffer](#scan-depth). When this happens, *both* entries will be activated because "Bessie" activated the "bessie" entry and it activated the "rufus" entry. Now your LLM knows that Bessie's friend in the field is most likely a dog, letting it tell a more coherent story.
 
 ## Case-sensitive keys
 
 > Can be overridden on a per-entry basis.
 
-This makes [Keyword](#keywords) matching more strict, requiring that words match exactly in terms of capitalisation.
+This makes [Keyword](./worldinfo.md#keywords) matching more strict, requiring that words match exactly in terms of capitalization.
 
 This is mostly useful if your keys are proper nouns within your chat, like the names of important people or cities. It is likely quite unhelpful if your chat takes the form of text-message exchanges.
 
-For example, when this setting is active, `rose` will *not* match `Rose` becuse `'r' != 'R'`.
+For example, when this setting is active, `rose` will *not* match `Rose` because `'r' != 'R'`.
 
 ## Match whole words
 
 > Can be overridden on a per-entry basis.
 
-This makes [Keyword](#keywords) matching more strict, requiring that each keyword matches a word in the input based on common word-boundary markers (spaces, periods, hyphens).
+This makes [Keyword](./worldinfo.md#keywords) matching more strict, requiring that each keyword matches a word in the input based on common word-boundary markers (spaces, periods, hyphens).
 
 This is usually a good idea because `cat` likely shouldn't match `concatenate`.
 
-If you want to match words that start or end with a certain sequence of characters, consider [regular expressions](#regular-expressions-regex-as-keys).
+If you want to match words that start or end with a certain sequence of characters, consider [regular expressions](./worldinfo.md#regular-expressions-regex-as-keys).
 
 *Important: this setting is often incompatible with languages that don't use whitespace to separate words (e.g. Japanese, Chinese). If you write entries in these languages, it is advised to turn it off.*
 
@@ -125,7 +125,7 @@ If you want to match words that start or end with a certain sequence of characte
 
 > Can be overridden on a per-entry basis.
 
-This adds additional filtering logic to entries when Inclusion Groups are in use; for full details, see [the entry on Group Scoring in the entry structure](./structure.md#group-scoring).
+This adds additional filtering logic to entries when Inclusion Groups are in use; for full details, see [the entry on Group Scoring in the entry structure](./worldinfo.md#group-scoring).
 
 ## Alert on overflow
 

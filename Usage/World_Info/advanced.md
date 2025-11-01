@@ -25,13 +25,13 @@ Vector Storage matching adheres to these rules:
 1. The maximum number of entries that are allowed to be matched with the Vector Storage can be adjusted with the "Max Entries" setting.
    - This number only sets the limit and does not influence the token budget specified in the activation settings for World Info.
    - All of the budgeting rules still apply.
-1. This feature replaces [Keywords](./structure.md#keywords) and *only* Keywords.
+1. This feature replaces [Keywords](./worldinfo.md#keywords) and *only* Keywords.
    - All other checks must be satisfied for the entry to be activated: trigger %, character filters, inclusion groups, etc.
-1. The [Scan Depth](./structure.md#scan-depth) setting is not used.
+1. The [Scan Depth](./worldinfo.md#scan-depth) setting is not used.
   - The Vector Storage "Query messages" value is used instead to select the text for comparison.
   - This allows and encourages Scan Depth to be set to `0`, which will prevent Keyword matches from being possible, while still allowing entries to be activated.
 1. The "Vectorized" (🔗 (Chain Link)) status does not confer any special activation priority.
-  - A Vectorized entry behaves the same as a normal (🟢 (Green Circle)) entry in terms of both [Prompt Insertion](./insertion.md) and activation.
+  - A Vectorized entry behaves the same as a normal (🟢 (Green Circle)) entry in terms of both [Prompt Insertion](./worldinfo.md#prompt-insertion) and activation.
   - A Vectorized entry may still be activated by keywords if any are set and Scan Depth is non-zero or recursion might apply.
 
 *Note: the effectiveness of retrieval depends entirely on the outputs of the embedding model. It is impossible to predict exactly which entries will be activated. If you want deterministic and predictable results, stick to keyword matching.*

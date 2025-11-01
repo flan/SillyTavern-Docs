@@ -32,7 +32,7 @@ These prompts are sent to the Chat Completion model to help it understand the in
 If the format template is not set, the information will be sent as-is, without any wrapping.
 !!!
 
-These are string templates used to wrap the information pulled from [World Info](/Usage/worldinfo/index.md) and [Character Cards](/Usage/Characters/characterdesign.md).
+These are string templates used to wrap the information pulled from [World Info](/Usage/World_Info/index.md) and [Character Cards](/Usage/Characters/characterdesign.md).
 
 A special marker is used to indicate where the information should be inserted:
 

@@ -33,7 +33,7 @@ Empty titles can be auto-populated with the "Fill empty memos" button at the top
   - The idea here is to let the LLM score the entry according to its own understanding of language, then compare those scores to the context being evaluated to determine whether they are sufficiently similar to warrant inclusion.
   - This is a common cause of confusion when writing Lorebooks and it is not recommended while you are still learning how to interact with your LLM model, SillyTavern, and story-generation in general.
 
-*Note: activating an entry is not sufficient for it to be [included in the final prompt](./insertion.md): there is a [limited amount of space available](./global.md#context--and-budget-cap) and some entries may be dropped.*
+*Note: activating an entry is not sufficient for it to be [included in the final prompt](#prompt-insertion): there is a [limited amount of space available](./global.md#context--and-budget-cap) and some entries may be dropped.*
 
 #### Position
 
@@ -89,11 +89,11 @@ Defines how many messages in the chat history should be scanned for World Info k
 
 > Can inherit from [Global Activation Settings](./global.md).
 
-This makes [Keyword](#keywords) matching more strict, requiring that words match exactly in terms of capitalisation.
+This makes [Keyword](#keywords) matching more strict, requiring that words match exactly in terms of capitalization.
 
 This is mostly useful if your keys are proper nouns within your chat, like the names of important people or cities. It is likely quite unhelpful if your chat takes the form of text-message exchanges.
 
-For example, when this setting is active, `rose` will *not* match `Rose` becuse `'r' != 'R'`.
+For example, when this setting is active, `rose` will *not* match `Rose` because `'r' != 'R'`.
 
 #### Whole Words
 
@@ -133,7 +133,7 @@ The input `sing me a song` can activate either entry (in this case, 2 keys match
 #### Automation ID
 This allows you to specify an arbitrary ID; if you do so *and* you create a Quick Reply function with the same ID (using the Quick Replies [extension](/extensions/index.md)), then whenever this entry is activated, that function will also trigger, allowing you to run [STscripts](/For_Contributors/st-script.md) contextually.
 
-Triggered functions will be queued and run in the order that they would be [inserted into your prompt](./insertion.md), [Blue Circle](#strategy) entries first, then others according to [Order](#order). Recursively activated entries will be processed afterwards, using the same ordering mechanism.
+Triggered functions will be queued and run in the order that they would be [inserted into your prompt](#prompt-insertion), [Blue Circle](#strategy) entries first, then others according to [Order](#order). Recursively activated entries will be processed afterwards, using the same ordering mechanism.
 
 If multiple entries would trigger the same Quick Reply function (based on ID-matching), that function will only be triggered once.
 
@@ -141,7 +141,7 @@ If multiple entries would trigger the same Quick Reply function (based on ID-mat
 The only part of the entry that the LLM will actually see. When activated, this text, after being processed to evaluate macros like `{{char}}` and `{{random}}`, will be prepared for inclusion in the prompt body.
 
 ##### Recursion
-When an entry [qualifies for inclusion in the prompt](./insertion.md), its content will then be used in another activation check, potentially activating even more entries. Each cycle of this process is a recursive layer.
+When an entry [qualifies for inclusion in the prompt](#prompt-insertion), its content will then be used in another activation check, potentially activating even more entries. Each cycle of this process is a recursive layer.
 
 The following flags control how recursion works with this entry, in addition to the [Global Activation Settings](./global.md):
 
@@ -187,7 +187,7 @@ This ensures that an entry will not be triggered before a certain number of mess
 #### Filter to Characters or Tags
 When populated, only the listed characters, or characters with any of the selected tags, will be able to activate this entry.
 
-Setting the "Exclude" flag inverts this behaviour, meaning that the indicated characters and tags *cannot* activate this entry.
+Setting the "Exclude" flag inverts this behavior, meaning that the indicated characters and tags *cannot* activate this entry.
 
 #### Filter to Generation Triggers
 Limits the events that can trigger activation of this entry. When none are explicitly specified, all methods are enabled.
@@ -226,11 +226,11 @@ Both Primary Keywords and Optional Filter support [regular expression syntax tha
 
 Regular expressions allow a single string to match multiple possible pieces of text, reducing the amount of repetition and prediction you need to account for.
 
-Consider a bit of text like "Computer, switch to DefProt 7 Red". Suppose that, in your world, you have a lot of colored defense-protocols, and that `DefProt` on its own doesn't refer to a specific battle-plan. You *could* write a long list of keywords like `defprot 1 red,defprot 2 orange,defprot 1 yellow`, but that's tedious to read and maintain; you could also match on `defprot` `AND ANY` `red,green,orange`, but then that might match someone talking about some fruit.
+Consider a bit of text like "Computer, switch to DefProt 7 Red". Suppose that, in your world, you have a lot of colored defense-protocols, and that `DefProt` on its own doesn't refer to a specific battle-plan. You *could* write a long list of keywords like `defprot 1 red,defprot 2 orange,defprot 1 yellow`, but that's tedious to read and maintain; you could also match on `defprot` `AND ANY` `red,green,orange`, but then that might match someone talking about fruit.
 
 With regular expressions, you could reduce this to `defprot \d+ (?:red|yellow|orange|banana)` and solve all of the problems at once.
 
-They can be combined with macros, too, for even more specialised cases:
+They can be combined with macros, too, for even more specialized cases:
 
 ```javascript
 /(?:{{char}}|he|she) (?:is talking about|is noticing|is checking whether|observes) (?:the )?(rainy weather|heavy wind|it is going to rain|cloudy sky)/i
@@ -250,15 +250,15 @@ For example, the following regex would trigger only when the user says "banana b
 
 (The `[^\x01]` parts avoid considering more than one message)
 
-## Insertion
+## Prompt Insertion
 
 Once all applicable entries have been activated, it becomes necessary to assemble the prompt to be sent to the LLM.
 
 For this process, there are a few considerations:
 
 1. There is a [finite context budget](./global.md#context--and-budget-cap).
-1. There are multiple [Insertion Positions](#insertion-position) that any given entry could occupy, affecting the order in which the LLM processes it and its proximity to other data for context.
-1. Every entry has metadata, like [Order](#order) that influence how favourably in their respective positions they will appear, with lower-ordered entries being discarded as needed. 
+1. There are multiple [Insertion Positions](#position-1) that any given entry could occupy, affecting the order in which the LLM processes it and its proximity to other data for context.
+1. Every entry has metadata, like [Order](#order) that influence how favorably in their respective positions they will appear, with lower-ordered entries being discarded as needed. 
 
 ### Position
 
@@ -294,7 +294,7 @@ Order defines the priority of an entry, used to serve as a tiebreaker when many 
 
 When an entry is assigned the Outlet insertion position, an additional Outlet Name field appears within the SillyTavern UI. The name entered within this field becomes the key for accessing a dynamic macro: if the given name is `banana`, then the macro `{{outlet::banana}}` will cause the corresponding World Info entry or entries to be produced in its place.
 
-Multiple Outlets may share the same name, which will cause the accumulated World Info entries to be appeaned to each other, separated by newlines, sorted by their [Order](#order) value.
+Multiple Outlets may share the same name, which will cause the accumulated World Info entries to be appended to each other, separated by newlines, sorted by their [Order](#order) value.
 
 Outlets created in this way are intended for use with the [Prompt Manager](../Prompts/prompt-manager.md) and [Advanced Formatting](../Prompts/advancedformatting.md) prompt fields.
 
@@ -304,7 +304,7 @@ Outlets created in this way are intended for use with the [Prompt Manager](../Pr
 
 * Placing Outlet macros inside World Info entries is not supported and will not work. This conflicts with the evaluation order of World Info and may lead to infinite loops.
 * Nesting Outlets is not supported. You cannot place an Outlet macro inside another Outlet's content. As with nesting inside of World Info entries, this may lead to infinite loops.
-* Character card fields (Description, Personality, Scenario, etc.) cannot expand Outlets. Those fields are parsed early so they can act as [additional matching sources](./structure.md#additional-matching-sources) for World Info activation, which means Outlets are not available when their text is processed. Use another macro-aware field if you need to place Outlet content in the prompt body instead.
+* Character card fields (Description, Personality, Scenario, etc.) cannot expand Outlets. Those fields are parsed early so they can act as [additional matching sources](./worldinfo.md#additional-matching-sources) for World Info activation, which means Outlets are not available when their text is processed. Use another macro-aware field if you need to place Outlet content in the prompt body instead.
 * The Author's Note editor also cannot resolve outlets. To place what would be Outlet content around the Author's Note, assign the entries to the **Top of Author's Note** or **Bottom of Author's Note** insertion positions instead of invoking the macro.
 * Outlet names are case-sensitive. The `{{outlet::}}` macro must use exactly the same capitalization as the entry's [Outlet Name](#outlet-name), otherwise no content will be returned.
 * Leading or trailing spaces in an outlet name are ignored when you call the macro, so names saved with extra whitespace will not match. Avoid padding names so they can be resolved correctly.
