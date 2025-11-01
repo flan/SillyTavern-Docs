@@ -37,7 +37,7 @@ Empty titles can be auto-populated with the "Fill empty memos" button at the top
 
 #### Position
 
-A means of ordering where the entry will appear in the prompt sent to the LLM; see [Insertion Position](./insertion.md#insertion-position).
+A means of ordering where the entry will appear in the prompt sent to the LLM; see [Insertion](#position-1).
 
 ##### Depth
 A means of determining where entries go related to each other at the same Position.
@@ -158,14 +158,16 @@ Each activated entry becomes a candidate for inclusion in the prompt that will b
 Setting the "Ignore budget" flag will ensure that this entry will not be discarded, exempting it from budgetary considerations. This may negatively affect the amount of space available to prepare a response, however, so be very careful and apply it only to small or absolutely essential entries.
 
 #### Inclusion Group
-An Inclusion Group is a collection of entries with this string as a shared label. When set, only one member of that group may be triggered at any given time, selected from among those that activated.
+An Inclusion Group is a collection of entries with this string as a shared label. When set, only one member of that group may be selected at any given time, selected from among those that activated.
 
 This may be useful for cases where a character might have one of a selection of demi-human traits, but they would be in conflict with each other if both activated at the same time, such as "cat ears" and "dog ears".
 
-The "Prioritize" flag may be used to indicate this this entry is dominant, with ties being settled based on [Order](#order).
+A single entry may be made part of multiple inclusion groups by providing a comma-separated list, like `cat, dog,cow`. When such an entry is selected, all other entries in all associated groups will be disabled, preventing their own selection. Likewise, if a member of one of those groups is selected, then all other entries belonging to that group, including the entry with multiple memberships, is disabled: it does not get a chance to represent another group in the current prompt.
+
+The "Prioritize" flag may be used to indicate this this entry is dominant, with ties being settled based on [Order](#order). This supersedes [Group Weight](#group-weight) when there might otherwise be competition and may allow generally low-scoring entries a chance to be selected more often.
 
 #### Group Weight
-If multiple members of a group are set to be activated, this influences the dice-roll to determine which will be chosen: `weight / sum(weights[first_entry], weights[second_entry], ...)`
+If multiple members of a group are set to be activated, this influences the dice-roll to determine which will be chosen: `probability = weight / sum(weights[first_entry], weights[second_entry], ...)`
 
 #### Sticky
 > See [Timed Effects](./advanced.md#timed-effects) for more information.
@@ -247,3 +249,63 @@ For example, the following regex would trigger only when the user says "banana b
 ```
 
 (The `[^\x01]` parts avoid considering more than one message)
+
+## Insertion
+
+Once all applicable entries have been activated, it becomes necessary to assemble the prompt to be sent to the LLM.
+
+For this process, there are a few considerations:
+
+1. There is a [finite context budget](./global.md#context--and-budget-cap).
+1. There are multiple [Insertion Positions](#insertion-position) that any given entry could occupy, affecting the order in which the LLM processes it and its proximity to other data for context.
+1. Every entry has metadata, like [Order](#order) that influence how favourably in their respective positions they will appear, with lower-ordered entries being discarded as needed. 
+
+### Position
+
+This somewhat complicated option is worth taking the time to learn, but the default setting will generally work well enough.
+
+- Before Character Definitions (￪Char): the World Info entry is inserted before the character's description and scenario.
+ - This Has a moderate impact on the conversation and might not help much if it refers to information about the character that has not yet been introduced.
+- After Character Definitions (￬Char): the World Info entry is inserted after the character's description and scenario.
+  - This has a somewhat significant impact on the conversation, allowing additional information about the character to be presented while in close proximity to the character's core definition.
+- Before Example Messages (￪EM): the World Info entry is parsed as an example dialogue block and inserted before any examples provided by the character card.
+- After Example Messages (￬EM): the World Info entry is parsed as an example dialogue block and inserted after any examples provided by the character card.
+- Top of Author's Note (￪AN): World Info entry is inserted above Author's Note content.
+  - The impact varies with the position of the Author's Note, which is configurable.
+- Bottom of Author's Note (￬AN): World Info entry is inserted below Author's Note content.
+  - The impact varies with the position of the Author's Note, which is configurable.
+- Depth relative to the end of a prompt-block (@D):
+  - ⚙️ (gear): system-role messages
+  - 👤 (person): user-role messages
+  - 🤖 (robot): assistant-role messages
+- Outlet: The World Info entry is not inserted automatically. Instead, its content is stored under a named Outlet so you can decide exactly where it appears in the prompt; see [Outlet Name](#outlet-name) for details.
+
+Example Message entries will be formatted according to the prompt-building settings: either Instruct Mode or Chat Completion prompt manager. They also follow the Example Messages Behavior rules: being gradually pushed out as context fills, marked as always kept, or disabled altogether.
+
+If your Author's Note is disabled (Insertion Frequency = 0), World Info entries set to insert relative to the Author's Note will be discarded.
+
+#### Depth
+When one of the "@D" options is chosen, this sets the relative position of the entry, with `0` being at the bottom of the prompt-block, `1` being one entry prior, `2` being two entries prior, and so forth.
+
+#### Order
+Order defines the priority of an entry, used to serve as a tiebreaker when many are activated simultaneously. Entries with larger Order numbers will be inserted closer to the end of the context, which gives them more impact on the response. For example, an entry with an Order of `100` will appear in the context before an entry with an Order of `250`.
+
+#### Outlet Name
+
+When an entry is assigned the Outlet insertion position, an additional Outlet Name field appears within the SillyTavern UI. The name entered within this field becomes the key for accessing a dynamic macro: if the given name is `banana`, then the macro `{{outlet::banana}}` will cause the corresponding World Info entry or entries to be produced in its place.
+
+Multiple Outlets may share the same name, which will cause the accumulated World Info entries to be appeaned to each other, separated by newlines, sorted by their [Order](#order) value.
+
+Outlets created in this way are intended for use with the [Prompt Manager](../Prompts/prompt-manager.md) and [Advanced Formatting](../Prompts/advancedformatting.md) prompt fields.
+
+*Note: An Outlet lacking a name will be skipped, so be sure not to overlook the field. The UI element supports autocomplete to make it easier to ensure that Outlets that should share names can be found quickly and have identical spelling.*
+
+##### Limitations and caveats
+
+* Placing Outlet macros inside World Info entries is not supported and will not work. This conflicts with the evaluation order of World Info and may lead to infinite loops.
+* Nesting Outlets is not supported. You cannot place an Outlet macro inside another Outlet's content. As with nesting inside of World Info entries, this may lead to infinite loops.
+* Character card fields (Description, Personality, Scenario, etc.) cannot expand Outlets. Those fields are parsed early so they can act as [additional matching sources](./structure.md#additional-matching-sources) for World Info activation, which means Outlets are not available when their text is processed. Use another macro-aware field if you need to place Outlet content in the prompt body instead.
+* The Author's Note editor also cannot resolve outlets. To place what would be Outlet content around the Author's Note, assign the entries to the **Top of Author's Note** or **Bottom of Author's Note** insertion positions instead of invoking the macro.
+* Outlet names are case-sensitive. The `{{outlet::}}` macro must use exactly the same capitalization as the entry's [Outlet Name](#outlet-name), otherwise no content will be returned.
+* Leading or trailing spaces in an outlet name are ignored when you call the macro, so names saved with extra whitespace will not match. Avoid padding names so they can be resolved correctly.
+* Outlet macros that have no content assigned to them will be replaced with an empty string.
