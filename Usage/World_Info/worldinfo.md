@@ -282,7 +282,7 @@ This somewhat complicated option is worth taking the time to learn, but the defa
 
 Example Message entries will be formatted according to the prompt-building settings: either Instruct Mode or Chat Completion prompt manager. They also follow the Example Messages Behavior rules: being gradually pushed out as context fills, marked as always kept, or disabled altogether.
 
-If your Author's Note is disabled (Insertion Frequency = 0), World Info entries set to insert relative to the Author's Note will be discarded.
+If your Author's Note is disabled (Insertion Frequency = `0`), World Info entries set to insert relative to the Author's Note will be discarded.
 
 #### Depth
 When one of the "@D" options is chosen, this sets the relative position of the entry, with `0` being at the bottom of the prompt-block, `1` being one entry prior, `2` being two entries prior, and so forth.
