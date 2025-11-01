@@ -37,7 +37,7 @@ The behaviour of these Lorebooks are all functionally identical and entries acti
 * Activation keywords, titles, and other descriptive information outside of the `Content` field is never sent to the AI as part of the prompt body, so be sure that each World Info entry is self-contained.
   * An entry titled "Banana Bread" with `Content` of "This is tasty." will only be presented as `This is tasty.`, which will not help meaningfully guide the response.
 * Activations can trigger more activations, allowing Lorebooks to chain related information through branching paths.
-  * This allows a common detail, like the description of a species, to be referenced from multiple entries; see [notes on recursion](./structure.md#recursive-scanning).
+  * This allows a common detail, like the description of a species, to be referenced from multiple entries; see [notes on recursion](./global.md#recursive-scanning).
 * Just as there is a limit to the context-window an AI can work with, there is a (configurable) limit to how much World Info SillyTavern will include in its prompts.
   * Activating everything and setting strategies to insert every entry will not only overload the AI with irrelevant information, it will also push out the parts that you actually want for the response.
   * Be judicious in selecting what gets activated and write short, concise entries that hint at what the AI should know, rather than verbose instructions that tell it what to do.

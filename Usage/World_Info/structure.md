@@ -33,6 +33,8 @@ Empty titles can be auto-populated with the "Fill empty memos" button at the top
   - The idea here is to let the LLM score the entry according to its own understanding of language, then compare those scores to the context being evaluated to determine whether they are sufficiently similar to warrant inclusion.
   - This is a common cause of confusion when writing Lorebooks and it is not recommended while you are still learning how to interact with your LLM model, SillyTavern, and story-generation in general.
 
+*Note: activating an entry is not sufficient for it to be [included in the final prompt](./insertion.md): there is a [limited amount of space available](./global.md#context--budget) and some entries may be dropped.*
+
 #### Position
 
 A means of ordering where the entry will appear in the prompt sent to the LLM; see [Insertion Position](./insertion.md#insertion-position).

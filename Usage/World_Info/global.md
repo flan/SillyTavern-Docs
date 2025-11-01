@@ -39,7 +39,7 @@ Hello! Good to see you.
 How is the weather today?
 ```
 
-### Context % / Budget
+### Context % (Budget)
 
 **Defines how many tokens could be used by World Info entries at once.**
 You can define a threshold relative to your API's max-context settings (Context %) or an objective token threshold (Budget)
