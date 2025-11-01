@@ -15,13 +15,13 @@ These settings apply to all activation logic and may be configured from a collap
 
 Defines how many messages in the chat history should be scanned for World Info keys, starting from the most recent.
 
-* When set to 0, only recursed entries and Author's Note are evaluated.
-* When set to 1, SillyTavern only scans the last message.
-* When set to 2, the two most recent messages are considered; there is no practical upper limit.
+* When set to `0`, only recursed entries and Author's Note are evaluated.
+* When set to `1`, SillyTavern only scans the last message.
+* When set to `2`, the two most recent messages are considered; there is no practical upper limit.
 
 ## Context % and Budget Cap
 
-Specifies how many tokens are available for World Info entries in each prompt sent to the LLM.
+These specify how many tokens are available for World Info entries in each prompt sent to the LLM.
 
 This can be defined two ways: as a percentage of your configured [Context size](/Usage/Common-Settings.md#context-tokens) (Context %) and as an absolute value (Budget).
 
@@ -40,6 +40,8 @@ This setting will respect [Max Depth](#max-depth) and the [context budget](#cont
 ## Max Depth
 
 The Maximum Depth to scan, used to set a limit on how many chat messages [Min Activations](#min-activations) can consider.
+
+Its purpose is to prevent the search from going so far back as to include now-irrelevant information.
 
 ## Max Recursion Steps
 
@@ -97,7 +99,7 @@ Keyword: rufus
 Content: Rufus is a dog.
 ```
 
-Next, suppose the text "Bessie saw her friend playing in the field." is part of your [scan-buffer](#scan-depth). When this happens, *both* entries will be activated because "Bessie" activated the "bessie" entry and it activated the "rufus" entry. Now your LLM knows that Bessie's friend in the field is most likely a dog, letting it tell a more coherent story.
+Next, suppose the text `Bessie saw her friend playing in the field.` is part of your [scan-buffer](#scan-depth). When this happens, *both* entries will be activated because "Bessie" activated the `bessie` entry and it activated the `rufus` entry in a recursive pass. Now your LLM knows that Bessie's friend in the field is most likely a dog named Rufus, letting it tell a more coherent story.
 
 ## Case-sensitive keys
 
@@ -105,7 +107,9 @@ Next, suppose the text "Bessie saw her friend playing in the field." is part of 
 
 This makes [Keyword](./worldinfo.md#keywords) matching more strict, requiring that words match exactly in terms of capitalization.
 
-This is mostly useful if your keys are proper nouns within your chat, like the names of important people or cities. It is likely quite unhelpful if your chat takes the form of text-message exchanges.
+This is mostly useful if your keys are proper nouns within your chat, like the names of important people or cities.
+
+It is likely quite unhelpful if your chat takes the form of text-message exchanges where the style is often intentionally lazy.
 
 For example, when this setting is active, `rose` will *not* match `Rose` because `'r' != 'R'`.
 
@@ -115,17 +119,17 @@ For example, when this setting is active, `rose` will *not* match `Rose` because
 
 This makes [Keyword](./worldinfo.md#keywords) matching more strict, requiring that each keyword matches a word in the input based on common word-boundary markers (spaces, periods, hyphens).
 
-This is usually a good idea because `cat` likely shouldn't match `concatenate`.
+This is usually a good idea because `cat` probably shouldn't match `concatenate`.
 
-If you want to match words that start or end with a certain sequence of characters, consider [regular expressions](./worldinfo.md#regular-expressions-regex-as-keys).
+If you want to match words that start or end with a certain sequence of characters, consider [regular expressions](./advanced.md#regular-expressions-regex-as-keys).
 
-*Important: this setting is often incompatible with languages that don't use whitespace to separate words (e.g. Japanese, Chinese). If you write entries in these languages, it is advised to turn it off.*
+*Important: this setting is often incompatible with languages that don't use whitespace to separate words (e.g. Japanese, Chinese). If you write keywords in these languages, it is advised to turn it off.*
 
 ## Use Group Scoring
 
 > Can be overridden on a per-entry basis.
 
-This adds additional filtering logic to entries when Inclusion Groups are in use; for full details, see [the entry on Group Scoring in the entry structure](./worldinfo.md#group-scoring).
+This adds additional filtering logic to entries when Inclusion Groups are in use; for full details, see [the notes on Group Scoring in the entry structure](./worldinfo.md#group-scoring).
 
 ## Alert on overflow
 
@@ -137,9 +141,9 @@ Entries will still be discarded as necessary; this just makes it more obvious wh
 
 This selects a prioritization approach for sources of World Info.
 
-### Sorted Evenly (default)
+### Sorted Evenly <sub>(default)</sub>
 
-All entries will be sorted according to their Insertion Order as if they were part of a large World Info source, regardless of how they are actually structured.
+All entries will be sorted according to their [Insertion Order](./worldinfo.md#prompt-insertion) as if they were part of a single large World Info source, regardless of how they are actually structured.
 
 #### Character Lore First
 
