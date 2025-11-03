@@ -250,10 +250,13 @@ This somewhat complicated option is worth taking the time to learn, but the defa
   - The impact varies with the position of the Author's Note, which is configurable.
 - **Bottom of Author's Note** (￬AN): World Info entry is inserted below Author's Note content.
   - The impact varies with the position of the Author's Note, which is configurable.
-- **Depth relative to the end of a prompt-block** (@D):
-  - ⚙️ (gear): system-role messages
-  - 👤 (person): user-role messages
-  - 🤖 (robot): assistant-role messages
+- **Depth relative to the end of the list of prompts** (@D):
+  This places the message relative to the end of your chat history.
+
+  Messages may be marked as one of three types, which the LLM will use to interpret the content within:
+  - ⚙️ (gear): system-role message (instructions and hints)
+  - 👤 (person): user-role message (messages from the user)
+  - 🤖 (robot): assistant-role message (messages from the LLM)
 - **Outlet**: The World Info entry is not inserted automatically. Instead, its content is stored under a named Outlet so you can decide exactly where it appears in the prompt; see [Outlet Name](#outlet-name) for details.
 
 Example Message entries will be formatted according to the [prompt-building settings](/Usage/Prompts/index.md): either Instruct Mode or the Chat Completion prompt manager. They also follow the [Example Messages Behavior rules](/Usage/User_Settings/index.md#chatmessage-handling): being gradually pushed out as context fills, marked as always kept, or disabled altogether.
